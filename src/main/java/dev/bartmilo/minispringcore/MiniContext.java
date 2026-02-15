@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
 public class MiniContext {
   // It holds the blueprints - the classes that we want to create
@@ -25,7 +27,8 @@ public class MiniContext {
 
   public <T> T getBean(Class<T> clazz) {
     if (!this.componentClasses.contains(clazz)) {
-      throw new BeanException(String.format("Bean not registered: %s", clazz.getName()));
+      throw new NoSuchBeanDefinitionException(
+          String.format("No bean named '%s' available", clazz.getName()));
     }
     if (beanMap.containsKey(clazz)) {
       return (T) beanMap.get(clazz);
@@ -45,8 +48,8 @@ public class MiniContext {
       }
       return (T) constructor.newInstance(args);
     } catch (Exception e) {
-      throw new BeanException(String.format("Failed to instantiate bean: %s. Exception Message: %s",
-          clazz.getName(), e.getMessage()));
+      throw new BeanCreationException(
+          String.format("Error creating bean with name '%s'", clazz.getName()), e);
     }
   }
 }
