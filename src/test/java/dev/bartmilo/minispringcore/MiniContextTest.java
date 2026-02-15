@@ -1,6 +1,9 @@
 package dev.bartmilo.minispringcore;
 
 import org.junit.jupiter.api.Test;
+import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.minispringcore.resources.FailingConstructorBean;
 import dev.bartmilo.minispringcore.resources.TestRepository;
 import dev.bartmilo.minispringcore.resources.TestService;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,6 +15,34 @@ public class MiniContextTest {
   @BeforeEach
   public void init() {
     this.context = new MiniContext();
+  }
+
+  @Test
+  public void shouldThrowNoSuchBeanDefinitionExceptionWhenBeanNotRegistered() {
+    assertThrows(NoSuchBeanDefinitionException.class, () -> context.getBean(TestRepository.class));
+  }
+
+  @Test
+  public void shouldThrowBeanCreationExceptionWhenDependencyIsMissing() {
+    // TestService depends on TestRepository, but only TestService is registered
+    context.register(TestService.class);
+    BeanCreationException exception =
+        assertThrows(BeanCreationException.class, () -> context.getBean(TestService.class));
+    // The cause should be the NoSuchBeanDefinitionException for the missing repository
+    assertTrue(exception.getCause() instanceof NoSuchBeanDefinitionException);
+  }
+
+  @Test
+  public void shouldThrowBeanCreationExceptionWhenConstructorThrowsException() {
+    context.register(FailingConstructorBean.class);
+    assertThrows(BeanCreationException.class,
+        () -> context.getBean(FailingConstructorBean.class));
+  }
+
+  @Test
+  public void shouldThrowBeanCreationExceptionForInterface() {
+    context.register(Runnable.class);
+    assertThrows(BeanCreationException.class, () -> context.getBean(Runnable.class));
   }
 
   @Test
