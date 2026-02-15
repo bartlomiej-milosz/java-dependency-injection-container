@@ -18,6 +18,15 @@ public class MiniContextTest {
   }
 
   @Test
+  public void shouldInitializeAllRegisteredClassesAfterRefresh() {
+    context.register(TestRepository.class);
+    context.register(TestService.class);
+    context.refresh();
+    assertNotNull(context.getBean(TestRepository.class));
+    assertNotNull(context.getBean(TestService.class));
+  }
+
+  @Test
   public void shouldThrowNoSuchBeanDefinitionExceptionWhenBeanNotRegistered() {
     assertThrows(NoSuchBeanDefinitionException.class, () -> context.getBean(TestRepository.class));
   }
@@ -35,8 +44,7 @@ public class MiniContextTest {
   @Test
   public void shouldThrowBeanCreationExceptionWhenConstructorThrowsException() {
     context.register(FailingConstructorBean.class);
-    assertThrows(BeanCreationException.class,
-        () -> context.getBean(FailingConstructorBean.class));
+    assertThrows(BeanCreationException.class, () -> context.getBean(FailingConstructorBean.class));
   }
 
   @Test
