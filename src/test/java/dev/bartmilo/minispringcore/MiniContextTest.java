@@ -2,8 +2,11 @@ package dev.bartmilo.minispringcore;
 
 import org.junit.jupiter.api.Test;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import dev.bartmilo.minispringcore.resources.FailingConstructorBean;
+import dev.bartmilo.minispringcore.resources.TestFailingConstructorBean;
+import dev.bartmilo.minispringcore.resources.TestCircularA;
+import dev.bartmilo.minispringcore.resources.TestCircularB;
 import dev.bartmilo.minispringcore.resources.TestRepository;
 import dev.bartmilo.minispringcore.resources.TestService;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,8 +46,9 @@ public class MiniContextTest {
 
   @Test
   public void shouldThrowBeanCreationExceptionWhenConstructorThrowsException() {
-    context.register(FailingConstructorBean.class);
-    assertThrows(BeanCreationException.class, () -> context.getBean(FailingConstructorBean.class));
+    context.register(TestFailingConstructorBean.class);
+    assertThrows(BeanCreationException.class,
+        () -> context.getBean(TestFailingConstructorBean.class));
   }
 
   @Test
@@ -72,5 +76,15 @@ public class MiniContextTest {
     assertNotNull(testService.getTestRepository(), "Dependency should be injected");
     assertSame(testService.getTestRepository(), context.getBean(TestRepository.class),
         "Injected dependency should be the singleton instance");
+  }
+
+  @Test
+  public void shouldThrowCircularDependencyExceptionWhenCycleExists() {
+    context.register(TestCircularA.class);
+    context.register(TestCircularB.class);
+    BeanCreationException exception =
+        assertThrows(BeanCreationException.class, () -> context.getBean(TestCircularA.class));
+    assertTrue(exception.getCause() instanceof BeanCreationException);
+    assertTrue(exception.getCause().getCause() instanceof CircularDependencyException);
   }
 }

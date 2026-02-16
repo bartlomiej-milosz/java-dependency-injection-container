@@ -1,16 +1,19 @@
 package dev.bartmilo.minispringcore;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
 public class MiniContext {
-  // It holds the blueprints - the classes that we want to create
-  private final List<Class<?>> componentClasses = new ArrayList<>();
+  // Registered blueprints
+  private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
+  // Circular dependency detection
+  private final Set<Class<?>> beansCurrentlyInCreation = new LinkedHashSet<>();
   // Map a class to an instance
   private final Map<Class<?>, Object> beanMap = new HashMap<>();
 
@@ -33,9 +36,17 @@ public class MiniContext {
     if (beanMap.containsKey(clazz)) {
       return (T) beanMap.get(clazz);
     }
-    T instance = this.createBean(clazz);
-    this.beanMap.put(clazz, instance);
-    return instance;
+    if (!beansCurrentlyInCreation.add(clazz)) {
+      throw new CircularDependencyException(
+          String.format("Circular dependency detected while creating bean: %s", clazz.getName()));
+    }
+    try {
+      T instance = this.createBean(clazz);
+      this.beanMap.put(clazz, instance);
+      return instance;
+    } finally {
+      beansCurrentlyInCreation.remove(clazz);
+    }
   }
 
   private <T> T createBean(Class<T> clazz) {
