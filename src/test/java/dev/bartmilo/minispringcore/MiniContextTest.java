@@ -29,13 +29,10 @@ public class MiniContextTest {
   }
 
   @Test
-  public void shouldThrowBeanCreationExceptionWhenDependencyIsMissing() {
+  public void shouldThrowNoSuchBeanDefinitionExceptionWhenDependencyIsMissing() {
     // TestService depends on TestRepository, but only TestService is registered
     context.register(TestService.class);
-    BeanCreationException exception =
-        assertThrows(BeanCreationException.class, () -> context.getBean(TestService.class));
-    // The cause should be the NoSuchBeanDefinitionException for the missing repository
-    assertTrue(exception.getCause() instanceof NoSuchBeanDefinitionException);
+    assertThrows(NoSuchBeanDefinitionException.class, () -> context.getBean(TestService.class));
   }
 
   @Test
@@ -75,10 +72,8 @@ public class MiniContextTest {
   public void shouldThrowCircularDependencyExceptionWhenCycleExists() {
     context.register(TestCircularA.class);
     context.register(TestCircularB.class);
-    BeanCreationException exception =
-        assertThrows(BeanCreationException.class, () -> context.getBean(TestCircularA.class));
-    assertTrue(exception.getCause() instanceof BeanCreationException);
-    assertTrue(exception.getCause().getCause() instanceof CircularDependencyException);
+
+    assertThrows(CircularDependencyException.class, () -> context.getBean(TestCircularA.class));
   }
 
   @Test

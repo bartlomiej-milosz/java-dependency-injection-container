@@ -14,7 +14,7 @@ import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
 public class MiniContext {
   // Registered blueprints (interface/type -> concrete implementation)
-  private final Map<Class<?>, Class<?>> definitionMap = new HashMap<>();
+  private final Map<Class<?>, Class<?>> beanDefinitions = new HashMap<>();
   // Circular dependency detection
   private final Set<Class<?>> beansCurrentlyInCreation = new LinkedHashSet<>();
   // Map a class to an instance
@@ -26,28 +26,29 @@ public class MiniContext {
 
   public void register(Class<?> type, Class<?> implementation) {
     if (implementation.isInterface() || Modifier.isAbstract(implementation.getModifiers())) {
-      throw new BeanRegistrationException("Cannot register interface or abstract class as implementation: "
-          + implementation.getName());
+      throw new BeanRegistrationException(
+          "Cannot register interface or abstract class as implementation: "
+              + implementation.getName());
     }
-    this.definitionMap.put(type, implementation);
+    this.beanDefinitions.put(type, implementation);
   }
 
   public void refresh() {
     // Loop through registered types and force creation
-    for (Class<?> type : definitionMap.keySet()) {
+    for (Class<?> type : beanDefinitions.keySet()) {
       this.getBean(type);
     }
   }
 
   public <T> T getBean(Class<T> type) {
-    if (!this.definitionMap.containsKey(type)) {
+    if (!this.beanDefinitions.containsKey(type)) {
       throw new NoSuchBeanDefinitionException(
           String.format("No bean named '%s' available", type.getName()));
     }
     if (beanMap.containsKey(type)) {
       return (T) beanMap.get(type);
     }
-    Class<?> implementation = definitionMap.get(type);
+    Class<?> implementation = beanDefinitions.get(type);
     if (!beansCurrentlyInCreation.add(implementation)) {
       throw new CircularDependencyException(String.format(
           "Circular dependency detected while creating bean: %s", implementation.getName()));
@@ -62,18 +63,23 @@ public class MiniContext {
   }
 
   private Object createBean(Class<?> clazz) {
+    Constructor<?> constructor = getConstructorWithTheMostParameters(clazz);
+    Object[] args = resolveDependencies(constructor);
     try {
-      Constructor<?> constructor = getConstructorWithTheMostParameters(clazz);
-      Class<?>[] paramTypes = constructor.getParameterTypes();
-      Object[] args = new Object[paramTypes.length];
-      for (int i = 0; i < paramTypes.length; i++) {
-        args[i] = this.getBean(paramTypes[i]);
-      }
       return constructor.newInstance(args);
     } catch (Exception e) {
       throw new BeanCreationException(
           String.format("Error creating bean with name '%s'", clazz.getName()), e);
     }
+  }
+
+  private Object[] resolveDependencies(Constructor<?> constructor) {
+    Class<?>[] paramTypes = constructor.getParameterTypes();
+    Object[] args = new Object[paramTypes.length];
+    for (int i = 0; i < paramTypes.length; i++) {
+      args[i] = this.getBean(paramTypes[i]);
+    }
+    return args;
   }
 
   private Constructor<?> getConstructorWithTheMostParameters(Class<?> clazz) {
