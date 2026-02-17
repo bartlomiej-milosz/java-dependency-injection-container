@@ -1,15 +1,15 @@
 package dev.bartmilo.minispringcore.resources;
 
-public class MultiConstructorBean {
+public class TestMultiConstructorBean {
   private final String value;
   private final TestRepository repository;
 
-  public MultiConstructorBean() {
+  public TestMultiConstructorBean() {
     this.value = "default";
     this.repository = null;
   }
 
-  public MultiConstructorBean(TestRepository repository) {
+  public TestMultiConstructorBean(TestRepository repository) {
     this.value = "repo-only";
     this.repository = repository;
   }

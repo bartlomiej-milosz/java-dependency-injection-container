@@ -88,12 +88,20 @@ public class MiniContextTest {
   @Test
   public void shouldSelectGreediestConstructor() {
     context.register(TestRepository.class);
-    context.register(MultiConstructorBean.class);
-    var bean = context.getBean(MultiConstructorBean.class);
+    context.register(TestMultiConstructorBean.class);
+    var bean = context.getBean(TestMultiConstructorBean.class);
     assertNotNull(bean);
     assertNotNull(bean.getRepository(),
         "Should have picked the constructor with TestRepository param");
     assertEquals("repo-only", bean.getValue());
+  }
+
+  @Test
+  public void shouldSelectAutowiredConstructor() {
+    context.register(TestRepository.class);
+    context.register(AutowiredBean.class);
+    var bean = context.getBean(AutowiredBean.class);
+    assertNotNull(bean);
   }
 
   @Test

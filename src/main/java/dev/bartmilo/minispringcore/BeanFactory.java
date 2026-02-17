@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import dev.bartmilo.minispringcore.annotations.Autowired;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
 import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
@@ -66,6 +67,9 @@ public class BeanFactory {
     // Find the "greediest" constructor (the one with the most parameters)
     Constructor<?> constructor = null;
     for (Constructor<?> c : clazz.getConstructors()) {
+      if (c.isAnnotationPresent(Autowired.class)) {
+        return c;
+      }
       if (constructor == null || c.getParameterCount() > constructor.getParameterCount()) {
         constructor = c;
       }
