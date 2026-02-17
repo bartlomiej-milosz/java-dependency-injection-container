@@ -1,3 +1,0 @@
-- test exceptions in MiniContext
-- test refresh()
-- 
