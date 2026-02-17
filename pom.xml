@@ -6,7 +6,7 @@
 
   <groupId>dev.bartmilo</groupId>
   <artifactId>mini-spring-core</artifactId>
-  <version>1.0-custom</version>
+  <version>1.0</version>
 
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
@@ -22,7 +22,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec.maven.plugin.version}</version>
         <configuration>
-          <mainClass>dev.bartmilo.minispringcore.MiniContext</mainClass>
+          <mainClass>dev.bartmilo.minispringcore.Main</mainClass>
         </configuration>
       </plugin>
     </plugins>
