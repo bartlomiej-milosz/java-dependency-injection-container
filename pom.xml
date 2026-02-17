@@ -22,7 +22,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>${exec.maven.plugin.version}</version>
         <configuration>
-          <mainClass>dev.bartmilo.app.App</mainClass>
+          <mainClass>dev.bartmilo.minispringcore.MiniContext</mainClass>
         </configuration>
       </plugin>
     </plugins>

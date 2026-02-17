@@ -1,66 +1,92 @@
 package dev.bartmilo.minispringcore;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
+import dev.bartmilo.minispringcore.exceptions.BeansException;
 import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
 public class MiniContext {
-  // Registered blueprints
-  private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
+  // Registered blueprints (interface/type -> concrete implementation)
+  private final Map<Class<?>, Class<?>> definitionMap = new HashMap<>();
   // Circular dependency detection
   private final Set<Class<?>> beansCurrentlyInCreation = new LinkedHashSet<>();
   // Map a class to an instance
   private final Map<Class<?>, Object> beanMap = new HashMap<>();
 
   public void register(Class<?> clazz) {
-    this.componentClasses.add(clazz);
+    this.register(clazz, clazz);
+  }
+
+  public void register(Class<?> type, Class<?> implementation) {
+    if (implementation.isInterface() || Modifier.isAbstract(implementation.getModifiers())) {
+      throw new BeanRegistrationException("Cannot register interface or abstract class as implementation: "
+          + implementation.getName());
+    }
+    this.definitionMap.put(type, implementation);
   }
 
   public void refresh() {
-    // Loop through registered classes and force creation
-    for (Class<?> clazz : componentClasses) {
-      this.getBean(clazz);
+    // Loop through registered types and force creation
+    for (Class<?> type : definitionMap.keySet()) {
+      this.getBean(type);
     }
   }
 
-  public <T> T getBean(Class<T> clazz) {
-    if (!this.componentClasses.contains(clazz)) {
+  public <T> T getBean(Class<T> type) {
+    if (!this.definitionMap.containsKey(type)) {
       throw new NoSuchBeanDefinitionException(
-          String.format("No bean named '%s' available", clazz.getName()));
+          String.format("No bean named '%s' available", type.getName()));
     }
-    if (beanMap.containsKey(clazz)) {
-      return (T) beanMap.get(clazz);
+    if (beanMap.containsKey(type)) {
+      return (T) beanMap.get(type);
     }
-    if (!beansCurrentlyInCreation.add(clazz)) {
-      throw new CircularDependencyException(
-          String.format("Circular dependency detected while creating bean: %s", clazz.getName()));
+    Class<?> implementation = definitionMap.get(type);
+    if (!beansCurrentlyInCreation.add(implementation)) {
+      throw new CircularDependencyException(String.format(
+          "Circular dependency detected while creating bean: %s", implementation.getName()));
     }
     try {
-      T instance = this.createBean(clazz);
-      this.beanMap.put(clazz, instance);
+      T instance = (T) this.createBean(implementation);
+      this.beanMap.put(type, instance);
       return instance;
     } finally {
-      beansCurrentlyInCreation.remove(clazz);
+      beansCurrentlyInCreation.remove(implementation);
     }
   }
 
-  private <T> T createBean(Class<T> clazz) {
+  private Object createBean(Class<?> clazz) {
     try {
-      Constructor<?> constructor = clazz.getConstructors()[0];
+      Constructor<?> constructor = getConstructorWithTheMostParameters(clazz);
       Class<?>[] paramTypes = constructor.getParameterTypes();
       Object[] args = new Object[paramTypes.length];
       for (int i = 0; i < paramTypes.length; i++) {
         args[i] = this.getBean(paramTypes[i]);
       }
-      return (T) constructor.newInstance(args);
+      return constructor.newInstance(args);
     } catch (Exception e) {
       throw new BeanCreationException(
           String.format("Error creating bean with name '%s'", clazz.getName()), e);
     }
+  }
+
+  private Constructor<?> getConstructorWithTheMostParameters(Class<?> clazz) {
+    // Find the "greediest" constructor (the one with the most parameters)
+    Constructor<?> constructor = null;
+    for (Constructor<?> c : clazz.getConstructors()) {
+      if (constructor == null || c.getParameterCount() > constructor.getParameterCount()) {
+        constructor = c;
+      }
+    }
+    if (constructor == null) {
+      throw new BeanCreationException("No public constructor found for " + clazz.getName());
+    }
+    return constructor;
   }
 }

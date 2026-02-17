@@ -1,14 +1,8 @@
 package dev.bartmilo.minispringcore;
 
 import org.junit.jupiter.api.Test;
-import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
-import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import dev.bartmilo.minispringcore.resources.TestFailingConstructorBean;
-import dev.bartmilo.minispringcore.resources.TestCircularA;
-import dev.bartmilo.minispringcore.resources.TestCircularB;
-import dev.bartmilo.minispringcore.resources.TestRepository;
-import dev.bartmilo.minispringcore.resources.TestService;
+import dev.bartmilo.minispringcore.resources.*;
+import dev.bartmilo.minispringcore.exceptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -53,8 +47,7 @@ public class MiniContextTest {
 
   @Test
   public void shouldThrowBeanCreationExceptionForInterface() {
-    context.register(Runnable.class);
-    assertThrows(BeanCreationException.class, () -> context.getBean(Runnable.class));
+    assertThrows(BeanRegistrationException.class, () -> context.register(Runnable.class));
   }
 
   @Test
@@ -86,5 +79,30 @@ public class MiniContextTest {
         assertThrows(BeanCreationException.class, () -> context.getBean(TestCircularA.class));
     assertTrue(exception.getCause() instanceof BeanCreationException);
     assertTrue(exception.getCause().getCause() instanceof CircularDependencyException);
+  }
+
+  @Test
+  public void shouldResolveInterfaceToImplementation() {
+    context.register(TestRepositoryInterface.class, TestRepositoryImpl.class);
+    var bean = context.getBean(TestRepositoryInterface.class);
+    assertNotNull(bean);
+    assertTrue(bean instanceof TestRepositoryImpl);
+    assertEquals("data from impl", bean.getData());
+  }
+
+  @Test
+  public void shouldSelectGreediestConstructor() {
+    context.register(TestRepository.class);
+    context.register(MultiConstructorBean.class);
+    var bean = context.getBean(MultiConstructorBean.class);
+    assertNotNull(bean);
+    assertNotNull(bean.getRepository(),
+        "Should have picked the constructor with TestRepository param");
+    assertEquals("repo-only", bean.getValue());
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenRegisteringInterfaceDirectly() {
+    assertThrows(BeansException.class, () -> context.register(TestRepositoryInterface.class));
   }
 }
