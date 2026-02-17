@@ -64,19 +64,28 @@ public class BeanFactory {
   }
 
   private Constructor<?> getConstructorWithTheMostParameters(Class<?> clazz) {
-    // Find the "greediest" constructor (the one with the most parameters)
-    Constructor<?> constructor = null;
+    Constructor<?> autowiredConstructor = null;
+    Constructor<?> greediestConstructor = null;
+
     for (Constructor<?> c : clazz.getConstructors()) {
       if (c.isAnnotationPresent(Autowired.class)) {
-        return c;
+        if (autowiredConstructor != null) {
+          throw new BeanCreationException(
+              "Multiple constructors annotated with @Autowired found in: " + clazz.getName());
+        }
+        autowiredConstructor = c;
       }
-      if (constructor == null || c.getParameterCount() > constructor.getParameterCount()) {
-        constructor = c;
+      if (greediestConstructor == null
+          || c.getParameterCount() > greediestConstructor.getParameterCount()) {
+        greediestConstructor = c;
       }
     }
-    if (constructor == null) {
+    if (autowiredConstructor != null) {
+      return autowiredConstructor;
+    }
+    if (greediestConstructor == null) {
       throw new BeanCreationException("No public constructor found for " + clazz.getName());
     }
-    return constructor;
+    return greediestConstructor;
   }
 }

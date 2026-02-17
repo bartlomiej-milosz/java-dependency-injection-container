@@ -105,6 +105,23 @@ public class MiniContextTest {
   }
 
   @Test
+  public void shouldThrowExceptionIfMultipleAutowiredConstructors() {
+    context.register(MultipleAutowiredBean.class);
+    assertThrows(BeanCreationException.class, () -> context.getBean(MultipleAutowiredBean.class));
+  }
+
+  @Test
+  public void shouldResolveDeepDependencyChain() {
+    context.register(TestDatabase.class);
+    context.register(TestDeepRepository.class);
+    context.register(TestDeepService.class);
+
+    var service = context.getBean(TestDeepService.class);
+    assertNotNull(service);
+    assertEquals("db-data", service.getData());
+  }
+
+  @Test
   public void shouldThrowExceptionWhenRegisteringInterfaceDirectly() {
     assertThrows(BeansException.class, () -> context.register(TestRepositoryInterface.class));
   }
