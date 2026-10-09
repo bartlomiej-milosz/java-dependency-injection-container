@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import dev.bartmilo.minispringcore.annotations.Autowired;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
@@ -18,10 +19,11 @@ public class BeanFactory {
   private final Map<Class<?>, Object> beanMap = new HashMap<>();
 
   public BeanFactory(BeanDefinitionRegistry registry) {
-    this.registry = registry;
+    this.registry = Objects.requireNonNull(registry, "Bean registry must not be null");
   }
 
   public <T> T getBean(Class<T> type) {
+    Objects.requireNonNull(type, "Bean type must not be null");
     if (!this.registry.getBeanDefinitions().containsKey(type)) {
       throw new NoSuchBeanDefinitionException(
           String.format("No bean named '%s' available", type.getName()));

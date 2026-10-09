@@ -4,11 +4,11 @@ public class MiniContext {
   private final BeanDefinitionRegistry registry = new BeanDefinitionRegistry();
   private final BeanFactory factory = new BeanFactory(registry);
 
-  public void register(Class<?> clazz) {
+  public <T> void register(Class<T> clazz) {
     this.registry.register(clazz, clazz);
   }
 
-  public void register(Class<?> type, Class<?> implementation) {
+  public <T> void register(Class<T> type, Class<? extends T> implementation) {
     this.registry.register(type, implementation);
   }
 
