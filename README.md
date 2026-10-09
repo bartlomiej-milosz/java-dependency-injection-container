@@ -1,4 +1,4 @@
-# Mini Spring Core
+# Java Dependency Injection Container
 
 A small educational dependency injection container written in Java. It explores Java Core,
 reflection, constructor injection, recursion, failure handling, and behavior testing.

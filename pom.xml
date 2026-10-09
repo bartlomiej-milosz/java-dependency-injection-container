@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>dev.bartmilo</groupId>
-  <artifactId>mini-spring-core</artifactId>
+  <artifactId>java-di-container</artifactId>
   <version>1.0</version>
 
   <properties>
