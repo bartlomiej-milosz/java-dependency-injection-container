@@ -1,8 +1,9 @@
 # Java Dependency Injection Container
 
-A small educational dependency injection container written in Java. It explores Java Core,
-reflection, constructor injection, recursion, failure handling, and behavior testing.
-It is a learning project inspired by Spring's core ideas, with a deliberately limited API.
+An educational dependency injection container in plain Java, without Spring Framework or other
+production dependencies. It demonstrates constructor injection, explicit interface bindings,
+singleton caching, circular dependency detection, reflection, and behavior testing.
+Its deliberately small API is inspired by Spring's core mechanisms.
 
 ## Requirements and build
 
@@ -11,76 +12,47 @@ It is a learning project inspired by Spring's core ideas, with a deliberately li
 - The first wrapper run needs internet access to download Maven and build/test dependencies.
   On Unix-like systems, downloading Maven requires `curl` or `wget` and archive extraction tools.
 
-Run from the repository root:
+## Quick start
+
+Run from the repository root: the directory containing `pom.xml` and `mvnw`.
 
 ```bash
-./mvnw --version
 ./mvnw --batch-mode clean verify
-./mvnw --batch-mode test
-./mvnw --batch-mode -Dtest=UsageExampleTest test
 ```
 
-The last command runs the executable example below. On Windows, use `mvnw.cmd` instead of
-`./mvnw`. The project has no production dependencies; JUnit 5 is a test dependency.
+This builds the library and runs its tests, creating `target/java-di-container-1.0.jar`.
+The JAR is a library artifact, not a standalone application to run with `java -jar`.
+
+Optional commands, run from the same directory:
+
+```bash
+./mvnw --version                                     # Check Maven and Java versions
+./mvnw --batch-mode test                             # Run tests only
+./mvnw --batch-mode -Dtest=UsageExampleTest test       # Run the executable example
+```
+
+On Windows, use `mvnw.cmd` instead of `./mvnw`. JUnit 5 is a test dependency.
 GitHub Actions is configured to run `clean verify` on Temurin 25 for pushes to `master`
 and pull requests targeting `master`.
 
-## Complete usage example
+## Usage example
 
-This JUnit example is included as
+This fragment uses the classes declared in the complete executable
 [`UsageExampleTest`](src/test/java/dev/bartmilo/minispringcore/UsageExampleTest.java).
-The package provides access to `MiniContext`; the remaining imports and declarations are
-included below. Constructor injection works even though the service is registered first.
+The container is `dev.bartmilo.minispringcore.MiniContext`. The test includes all imports and
+class declarations, verifies the greeting below, and demonstrates dependency sharing and refresh.
 
 ```java
-package dev.bartmilo.minispringcore;
+MiniContext context = new MiniContext();
+context.register(GreetingService.class);
+context.register(MessageRepository.class, InMemoryMessageRepository.class);
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-
-public class UsageExampleTest {
-  @Test
-  void createsServiceWithExplicitInterfaceBinding() {
-    MiniContext context = new MiniContext();
-    context.register(GreetingService.class);
-    context.register(MessageRepository.class, InMemoryMessageRepository.class);
-
-    GreetingService service = context.getBean(GreetingService.class);
-    assertEquals("Hello, Java!", service.greet());
-    assertSame(context.getBean(MessageRepository.class), service.repository);
-
-    context.refresh();
-    assertSame(service, context.getBean(GreetingService.class));
-  }
-
-  public interface MessageRepository {
-    String message();
-  }
-
-  public static class InMemoryMessageRepository implements MessageRepository {
-    public InMemoryMessageRepository() {}
-
-    @Override
-    public String message() {
-      return "Hello, Java!";
-    }
-  }
-
-  public static class GreetingService {
-    private final MessageRepository repository;
-
-    public GreetingService(MessageRepository repository) {
-      this.repository = repository;
-    }
-
-    public String greet() {
-      return repository.message();
-    }
-  }
-}
+GreetingService service = context.getBean(GreetingService.class);
+System.out.println(service.greet()); // Hello, Java!
 ```
+
+Constructor injection works even though the service is registered before its dependency.
+Run the example with the optional command shown above.
 
 ## Container contract
 

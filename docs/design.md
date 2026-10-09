@@ -78,9 +78,7 @@ registered after a failed retrieval, and the next retrieval can succeed.
 
 ## Project preparation
 
-The portfolio preparation stage used an AI coding assistant to help revise historical commit
-messages, implement validation and constructor-selection fixes, extend behavior tests, and
-prepare build configuration and documentation. Historical source changes retain their authors
-and author dates. The generated preparation changes should not be represented as independently
-written by the project owner. Understanding and explaining these changes is a separate review
-step for the owner.
+AI assistance was used during portfolio preparation to refine validation and constructor
+selection, extend tests, and improve build configuration and documentation. Historical commit
+messages were also standardized. Final cleanup aligned the project name and removed redundant
+tests and unused fixtures.
