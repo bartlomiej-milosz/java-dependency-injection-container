@@ -1,6 +1,7 @@
 package dev.bartmilo.minispringcore;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -29,19 +30,20 @@ public class BeanFactory {
           String.format("No bean named '%s' available", type.getName()));
     }
     if (beanMap.containsKey(type)) {
-      return (T) beanMap.get(type);
+      return type.cast(beanMap.get(type));
     }
     Class<?> implementation = this.registry.getBeanDefinitions().get(type);
-    if (!beansCurrentlyInCreation.add(implementation)) {
+    if (!beansCurrentlyInCreation.add(type)) {
       throw new CircularDependencyException(String.format(
-          "Circular dependency detected while creating bean: %s", implementation.getName()));
+          "Circular dependency detected while creating bean type: %s (implementation: %s)",
+          type.getName(), implementation.getName()));
     }
     try {
-      T instance = (T) this.createBean(implementation);
+      T instance = type.cast(this.createBean(implementation));
       this.beanMap.put(type, instance);
       return instance;
     } finally {
-      beansCurrentlyInCreation.remove(implementation);
+      beansCurrentlyInCreation.remove(type);
     }
   }
 
@@ -50,9 +52,13 @@ public class BeanFactory {
     Object[] args = resolveDependencies(constructor);
     try {
       return constructor.newInstance(args);
-    } catch (Exception e) {
+    } catch (InvocationTargetException e) {
       throw new BeanCreationException(
-          String.format("Error creating bean with name '%s'", clazz.getName()), e);
+          "Constructor failed while creating bean " + clazz.getName() + ": " + constructor,
+          e.getCause());
+    } catch (ReflectiveOperationException | IllegalArgumentException e) {
+      throw new BeanCreationException(
+          "Cannot invoke constructor for bean " + clazz.getName() + ": " + constructor, e);
     }
   }
 

@@ -43,7 +43,7 @@ public class MiniContextTest {
   }
 
   @Test
-  public void shouldThrowBeanCreationExceptionForInterface() {
+  public void shouldRejectInterfaceDuringRegistration() {
     assertThrows(BeanRegistrationException.class, () -> context.register(Runnable.class));
   }
 
