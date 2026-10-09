@@ -1,5 +1,9 @@
 package dev.bartmilo.minispringcore;
 
+import dev.bartmilo.minispringcore.annotations.Autowired;
+import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
+import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
+import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -7,10 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import dev.bartmilo.minispringcore.annotations.Autowired;
-import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
-import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
 /** Resolves constructor dependencies and caches instances by registration key. */
 public class BeanFactory {
@@ -35,9 +35,10 @@ public class BeanFactory {
     }
     Class<?> implementation = this.registry.getBeanDefinitions().get(type);
     if (!beansCurrentlyInCreation.add(type)) {
-      throw new CircularDependencyException(String.format(
-          "Circular dependency detected while creating bean type: %s (implementation: %s)",
-          type.getName(), implementation.getName()));
+      throw new CircularDependencyException(
+          String.format(
+              "Circular dependency detected while creating bean type: %s (implementation: %s)",
+              type.getName(), implementation.getName()));
     }
     try {
       T instance = type.cast(this.createBean(implementation));
@@ -103,8 +104,11 @@ public class BeanFactory {
     }
     if (ambiguous) {
       throw new BeanCreationException(
-          "Ambiguous public constructors with " + greediestConstructor.getParameterCount()
-              + " parameters in " + clazz.getName() + "; annotate one with @Autowired");
+          "Ambiguous public constructors with "
+              + greediestConstructor.getParameterCount()
+              + " parameters in "
+              + clazz.getName()
+              + "; annotate one with @Autowired");
     }
     return greediestConstructor;
   }

@@ -1,11 +1,11 @@
 package dev.bartmilo.minispringcore;
 
+import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
 
 /** Validates and stores explicit type-to-implementation bindings. */
 public class BeanDefinitionRegistry {

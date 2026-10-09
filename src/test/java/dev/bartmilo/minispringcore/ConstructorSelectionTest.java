@@ -1,12 +1,12 @@
 package dev.bartmilo.minispringcore;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.bartmilo.minispringcore.annotations.Autowired;
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 import dev.bartmilo.minispringcore.resources.TestPrivateConstructorBean;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ConstructorSelectionTest {
   @Test
@@ -14,7 +14,8 @@ class ConstructorSelectionTest {
     MiniContext context = new MiniContext();
     context.register(Dependency.class);
     context.register(SingleConstructor.class);
-    assertSame(context.getBean(Dependency.class), context.getBean(SingleConstructor.class).dependency);
+    assertSame(
+        context.getBean(Dependency.class), context.getBean(SingleConstructor.class).dependency);
   }
 
   @Test
@@ -45,8 +46,8 @@ class ConstructorSelectionTest {
   void rejectsMultipleAutowiredConstructors() {
     MiniContext context = new MiniContext();
     context.register(MultipleAnnotations.class);
-    BeanCreationException error = assertThrows(BeanCreationException.class,
-        () -> context.getBean(MultipleAnnotations.class));
+    BeanCreationException error =
+        assertThrows(BeanCreationException.class, () -> context.getBean(MultipleAnnotations.class));
     assertTrue(error.getMessage().contains(MultipleAnnotations.class.getName()));
     assertTrue(error.getMessage().contains("@Autowired"));
   }
@@ -55,8 +56,8 @@ class ConstructorSelectionTest {
   void rejectsTiedLongestConstructorsAndSuggestsAnnotation() {
     MiniContext context = new MiniContext();
     context.register(TiedConstructors.class);
-    BeanCreationException error = assertThrows(BeanCreationException.class,
-        () -> context.getBean(TiedConstructors.class));
+    BeanCreationException error =
+        assertThrows(BeanCreationException.class, () -> context.getBean(TiedConstructors.class));
     assertTrue(error.getMessage().contains(TiedConstructors.class.getName()));
     assertTrue(error.getMessage().contains("@Autowired"));
   }
@@ -65,8 +66,9 @@ class ConstructorSelectionTest {
   void rejectsBeanWithoutPublicConstructor() {
     MiniContext context = new MiniContext();
     context.register(TestPrivateConstructorBean.class);
-    BeanCreationException error = assertThrows(BeanCreationException.class,
-        () -> context.getBean(TestPrivateConstructorBean.class));
+    BeanCreationException error =
+        assertThrows(
+            BeanCreationException.class, () -> context.getBean(TestPrivateConstructorBean.class));
     assertTrue(error.getMessage().contains(TestPrivateConstructorBean.class.getName()));
   }
 
@@ -74,8 +76,9 @@ class ConstructorSelectionTest {
   void missingDependencyDoesNotFallBackToShorterConstructor() {
     MiniContext context = new MiniContext();
     context.register(LongestConstructor.class);
-    NoSuchBeanDefinitionException error = assertThrows(NoSuchBeanDefinitionException.class,
-        () -> context.getBean(LongestConstructor.class));
+    NoSuchBeanDefinitionException error =
+        assertThrows(
+            NoSuchBeanDefinitionException.class, () -> context.getBean(LongestConstructor.class));
     assertTrue(error.getMessage().contains(Dependency.class.getName()));
   }
 
@@ -87,50 +90,82 @@ class ConstructorSelectionTest {
   }
 
   public static class Dependency {}
+
   public static class OtherDependency {}
 
   public static class SingleConstructor {
     final Dependency dependency;
-    public SingleConstructor(Dependency dependency) { this.dependency = dependency; }
+
+    public SingleConstructor(Dependency dependency) {
+      this.dependency = dependency;
+    }
   }
 
   public static class LongestConstructor {
     final int selected;
-    public LongestConstructor() { selected = 0; }
-    public LongestConstructor(Dependency dependency) { selected = 1; }
-    public LongestConstructor(Dependency dependency, OtherDependency other) { selected = 2; }
+
+    public LongestConstructor() {
+      selected = 0;
+    }
+
+    public LongestConstructor(Dependency dependency) {
+      selected = 1;
+    }
+
+    public LongestConstructor(Dependency dependency, OtherDependency other) {
+      selected = 2;
+    }
   }
 
   public static class AnnotatedConstructor {
     final int selected;
+
     @Autowired
-    public AnnotatedConstructor(Dependency dependency) { selected = 1; }
-    public AnnotatedConstructor(Dependency dependency, OtherDependency other) { selected = 2; }
+    public AnnotatedConstructor(Dependency dependency) {
+      selected = 1;
+    }
+
+    public AnnotatedConstructor(Dependency dependency, OtherDependency other) {
+      selected = 2;
+    }
   }
 
   public static class AnnotatedWithTies {
     final int selected;
+
     @Autowired
-    public AnnotatedWithTies() { selected = 0; }
-    public AnnotatedWithTies(Dependency dependency) { selected = 1; }
-    public AnnotatedWithTies(OtherDependency other) { selected = 1; }
+    public AnnotatedWithTies() {
+      selected = 0;
+    }
+
+    public AnnotatedWithTies(Dependency dependency) {
+      selected = 1;
+    }
+
+    public AnnotatedWithTies(OtherDependency other) {
+      selected = 1;
+    }
   }
 
   public static class MultipleAnnotations {
     @Autowired
     public MultipleAnnotations() {}
+
     @Autowired
     public MultipleAnnotations(Dependency dependency) {}
   }
 
   public static class TiedConstructors {
     public TiedConstructors() {}
+
     public TiedConstructors(Dependency dependency) {}
+
     public TiedConstructors(OtherDependency other) {}
   }
 
   public static class PrivateAnnotation {
     public PrivateAnnotation() {}
+
     @Autowired
     private PrivateAnnotation(Dependency dependency) {}
   }

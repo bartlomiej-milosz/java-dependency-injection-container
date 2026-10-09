@@ -1,14 +1,15 @@
 package dev.bartmilo.minispringcore;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
+import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 import dev.bartmilo.minispringcore.resources.TestDatabase;
 import dev.bartmilo.minispringcore.resources.TestDeepRepository;
 import dev.bartmilo.minispringcore.resources.TestDeepService;
 import dev.bartmilo.minispringcore.resources.TestRepository;
-import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class MiniContextTest {
   private MiniContext context;

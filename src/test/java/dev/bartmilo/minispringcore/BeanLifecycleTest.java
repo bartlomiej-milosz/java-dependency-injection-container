@@ -1,16 +1,15 @@
 package dev.bartmilo.minispringcore;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
 import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 import dev.bartmilo.minispringcore.resources.TestCircularA;
 import dev.bartmilo.minispringcore.resources.TestCircularB;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BeanLifecycleTest {
   @BeforeEach
@@ -54,9 +53,11 @@ class BeanLifecycleTest {
     context.register(CountingRepository.class);
     context.register(Consumer.class);
     context.register(OtherConsumer.class);
-    assertSame(context.getBean(Consumer.class).repository,
+    assertSame(
+        context.getBean(Consumer.class).repository,
         context.getBean(OtherConsumer.class).repository);
-    assertSame(context.getBean(CountingRepository.class), context.getBean(Consumer.class).repository);
+    assertSame(
+        context.getBean(CountingRepository.class), context.getBean(Consumer.class).repository);
     assertEquals(1, CountingRepository.created);
   }
 
@@ -66,7 +67,8 @@ class BeanLifecycleTest {
     MiniContext second = new MiniContext();
     first.register(CountingRepository.class);
     second.register(CountingRepository.class);
-    assertNotSame(first.getBean(CountingRepository.class), second.getBean(CountingRepository.class));
+    assertNotSame(
+        first.getBean(CountingRepository.class), second.getBean(CountingRepository.class));
     assertEquals(2, CountingRepository.created);
   }
 
@@ -87,7 +89,8 @@ class BeanLifecycleTest {
     MiniContext context = new MiniContext();
     context.register(Consumer.class);
     context.register(CountingRepository.class);
-    assertSame(context.getBean(CountingRepository.class), context.getBean(Consumer.class).repository);
+    assertSame(
+        context.getBean(CountingRepository.class), context.getBean(Consumer.class).repository);
   }
 
   @Test
@@ -113,12 +116,12 @@ class BeanLifecycleTest {
     MiniContext context = new MiniContext();
     context.register(CountingRepository.class);
     context.register(FailingConsumer.class);
-    BeanCreationException first = assertThrows(BeanCreationException.class,
-        () -> context.getBean(FailingConsumer.class));
+    BeanCreationException first =
+        assertThrows(BeanCreationException.class, () -> context.getBean(FailingConsumer.class));
     assertSame(FailingConsumer.FAILURE, first.getCause());
     assertTrue(first.getMessage().contains(FailingConsumer.class.getName()));
-    BeanCreationException second = assertThrows(BeanCreationException.class,
-        () -> context.getBean(FailingConsumer.class));
+    BeanCreationException second =
+        assertThrows(BeanCreationException.class, () -> context.getBean(FailingConsumer.class));
     assertSame(FailingConsumer.FAILURE, second.getCause());
     assertEquals(2, FailingConsumer.attempts);
     assertEquals(1, CountingRepository.created);
@@ -142,8 +145,9 @@ class BeanLifecycleTest {
     MiniContext context = new MiniContext();
     context.register(SelfDependent.class);
     for (int attempt = 0; attempt < 2; attempt++) {
-      CircularDependencyException error = assertThrows(CircularDependencyException.class,
-          () -> context.getBean(SelfDependent.class));
+      CircularDependencyException error =
+          assertThrows(
+              CircularDependencyException.class, () -> context.getBean(SelfDependent.class));
       assertTrue(error.getMessage().contains(SelfDependent.class.getName()));
     }
     context.register(CountingRepository.class);
@@ -164,8 +168,9 @@ class BeanLifecycleTest {
     MiniContext context = new MiniContext();
     context.register(CyclicRepository.class, CyclicRepositoryImpl.class);
     context.register(CyclicService.class);
-    CircularDependencyException error = assertThrows(CircularDependencyException.class,
-        () -> context.getBean(CyclicRepository.class));
+    CircularDependencyException error =
+        assertThrows(
+            CircularDependencyException.class, () -> context.getBean(CyclicRepository.class));
     assertTrue(error.getMessage().contains(CyclicRepository.class.getName()));
     assertTrue(error.getMessage().contains(CyclicRepositoryImpl.class.getName()));
     assertThrows(CircularDependencyException.class, () -> context.getBean(CyclicService.class));
@@ -176,34 +181,46 @@ class BeanLifecycleTest {
     BeanDefinitionRegistry registry = new BeanDefinitionRegistry();
     registry.register(Repository.class, CountingRepository.class);
     Map<Class<?>, Class<?>> definitions = registry.getBeanDefinitions();
-    assertThrows(UnsupportedOperationException.class,
-        () -> definitions.put(Repository.class, String.class));
+    assertThrows(
+        UnsupportedOperationException.class, () -> definitions.put(Repository.class, String.class));
     assertThrows(UnsupportedOperationException.class, definitions::clear);
-    assertThrows(UnsupportedOperationException.class,
+    assertThrows(
+        UnsupportedOperationException.class,
         () -> definitions.entrySet().iterator().next().setValue(String.class));
     assertEquals(CountingRepository.class, registry.getBeanDefinitions().get(Repository.class));
     assertInstanceOf(CountingRepository.class, new BeanFactory(registry).getBean(Repository.class));
   }
 
   public interface Repository {}
+
   public static class CountingRepository implements Repository {
     static int created;
-    public CountingRepository() { created++; }
+
+    public CountingRepository() {
+      created++;
+    }
   }
 
   public static class Consumer {
     final CountingRepository repository;
-    public Consumer(CountingRepository repository) { this.repository = repository; }
+
+    public Consumer(CountingRepository repository) {
+      this.repository = repository;
+    }
   }
 
   public static class OtherConsumer {
     final CountingRepository repository;
-    public OtherConsumer(CountingRepository repository) { this.repository = repository; }
+
+    public OtherConsumer(CountingRepository repository) {
+      this.repository = repository;
+    }
   }
 
   public static class FailingConsumer {
     static final IllegalStateException FAILURE = new IllegalStateException("Constructor failed");
     static int attempts;
+
     public FailingConsumer(CountingRepository repository) {
       attempts++;
       throw FAILURE;
@@ -215,6 +232,7 @@ class BeanLifecycleTest {
   }
 
   public interface CyclicRepository {}
+
   public static class CyclicRepositoryImpl implements CyclicRepository {
     public CyclicRepositoryImpl(CyclicService service) {}
   }
