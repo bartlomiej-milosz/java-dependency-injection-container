@@ -12,6 +12,7 @@ import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
 import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
 import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
 
+/** Resolves constructor dependencies and caches instances by registration key. */
 public class BeanFactory {
   private final BeanDefinitionRegistry registry;
   // Circular dependency detection

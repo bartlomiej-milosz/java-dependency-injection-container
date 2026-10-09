@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
 
+/** Validates and stores explicit type-to-implementation bindings. */
 public class BeanDefinitionRegistry {
   // Registered blueprints (interface/type -> concrete implementation)
   private final Map<Class<?>, Class<?>> beanDefinitions = new HashMap<>();
@@ -29,6 +30,7 @@ public class BeanDefinitionRegistry {
     this.beanDefinitions.put(type, implementation);
   }
 
+  /** Returns a live, read-only view of the registered definitions. */
   public Map<Class<?>, Class<?>> getBeanDefinitions() {
     return Collections.unmodifiableMap(this.beanDefinitions);
   }
