@@ -20,7 +20,8 @@ Run from the repository root: the directory containing `pom.xml` and `mvnw`.
 ./mvnw --batch-mode clean verify
 ```
 
-This builds the library and runs its tests, creating `target/java-di-container-1.0.jar`.
+This builds the library and runs its tests, creating
+`target/java-dependency-injection-container-1.0.jar`.
 The JAR is a library artifact, not a standalone application to run with `java -jar`.
 
 Optional commands, run from the same directory:
@@ -34,6 +35,20 @@ Optional commands, run from the same directory:
 On Windows, use `mvnw.cmd` instead of `./mvnw`. JUnit 5 is a test dependency.
 GitHub Actions is configured to run `clean verify` on Temurin 25 for pushes to `master`
 and pull requests targeting `master`.
+
+## Java formatting
+
+Java sources and tests use Google Java Format with the `GOOGLE` style (2-space block
+indentation), enforced by the pinned Spotless Maven plugin. Formatting is checked during
+Maven's `validate` phase, so the main build command and CI fail on formatting violations.
+The check does not modify files.
+
+Run from the repository root:
+
+```bash
+./mvnw --batch-mode spotless:apply  # Format Java sources and tests
+./mvnw --batch-mode spotless:check  # Check formatting without changing files
+```
 
 ## Usage example
 
@@ -113,7 +128,7 @@ public definitions view is read-only.
 
 Flow: register definitions → request a type → reuse cache or select a constructor → resolve
 its dependencies → construct → cache. See [design notes](docs/design.md) for reading order,
-tradeoffs, failure cleanup, interview prompts, and the AI-assisted preparation disclosure.
+tradeoffs, failure cleanup, and design questions.
 
 JUnit tests cover valid and invalid registrations, duplicates and nulls, all constructor
 selection rules, missing dependencies without fallback, dependency chains and sharing,

@@ -67,7 +67,7 @@ registered after a failed retrieval, and the next retrieval can succeed.
   injection, qualifiers, additional scopes, lifecycle callbacks, AOP/proxies, external
   configuration, and full Spring compatibility. It is an educational library.
 
-## Interview prompts
+## Design questions
 
 - Why does constructor injection permit dependencies to be stored in final fields?
 - What is the difference between an implementation class and a registration key?
@@ -75,10 +75,3 @@ registered after a failed retrieval, and the next retrieval can succeed.
 - Why is choosing a constructor with reflection order unsafe when parameter counts tie?
 - What remains in the cache after a failed `refresh`, and why is rollback outside this design?
 - What would require a different design to make this container thread-safe?
-
-## Project preparation
-
-AI assistance was used during portfolio preparation to refine validation and constructor
-selection, extend tests, and improve build configuration and documentation. Historical commit
-messages were also standardized. Final cleanup aligned the project name and removed redundant
-tests and unused fixtures.
