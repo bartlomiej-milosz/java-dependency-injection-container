@@ -33,8 +33,8 @@ Optional commands, run from the same directory:
 ```
 
 On Windows, use `mvnw.cmd` instead of `./mvnw`. JUnit 5 is a test dependency.
-GitHub Actions is configured to run `clean verify` on Temurin 25 for pushes to `master`
-and pull requests targeting `master`.
+GitHub Actions is configured to run `clean verify` on Temurin 25 for pushes to `main`
+and pull requests targeting `main`.
 
 ## Java formatting
 
