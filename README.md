@@ -1,61 +1,52 @@
 # Java Dependency Injection Container
 
-An educational dependency injection container in plain Java, without Spring Framework or other
-production dependencies. It demonstrates constructor injection, explicit interface bindings,
-singleton caching, circular dependency detection, reflection, and behavior testing.
-Its deliberately small API is inspired by Spring's core mechanisms.
+A small dependency injection container built in plain Java, inspired by Spring's
+constructor injection model. It resolves explicitly registered dependencies through
+reflection and caches one instance per registered type within a context.
 
-## Requirements and build
+The project focuses on Java Core: generics, reflection, annotations, recursive
+dependency resolution, and exception handling. It has **no runtime dependencies**.
 
-- JDK 25, available through `JAVA_HOME` or `PATH`.
-- Maven Wrapper is included and pins Maven 3.10.0; a separate Maven installation is unnecessary.
-- The first wrapper run needs internet access to download Maven and build/test dependencies.
-  On Unix-like systems, downloading Maven requires `curl` or `wget` and archive extraction tools.
+## Features
 
-## Quick start
+- Explicit class registration and interface-to-implementation bindings.
+- Constructor injection with optional `@Autowired` selection.
+- Lazy creation through `getBean()` and eager initialization through `refresh()`.
+- Singleton caching per registration key and context.
+- Circular dependency detection and descriptive creation errors.
+- JUnit tests for successful resolution, invalid configuration, and failure recovery.
 
-Run from the repository root: the directory containing `pom.xml` and `mvnw`.
+## Build and run the example
+
+**Requirements:** JDK 25 and a shell. The included Maven Wrapper pins Maven 3.10.0;
+a separate Maven installation is unnecessary. The first build needs internet access
+to download Maven and dependencies. On macOS/Linux, the wrapper also needs `curl`
+or `wget` and archive extraction tools.
+
+From the repository root:
 
 ```bash
 ./mvnw --batch-mode clean verify
 ```
 
-This builds the library and runs its tests, creating
-`target/java-dependency-injection-container-1.0.jar`.
-The JAR is a library artifact, not a standalone application to run with `java -jar`.
+This checks Java formatting, runs the tests, and builds
+`target/java-dependency-injection-container-1.0.jar`. The JAR is a library, without
+an application entry point; it is not intended for `java -jar`.
 
-Optional commands, run from the same directory:
-
-```bash
-./mvnw --version                                     # Check Maven and Java versions
-./mvnw --batch-mode test                             # Run tests only
-./mvnw --batch-mode -Dtest=UsageExampleTest test       # Run the executable example
-```
-
-On Windows, use `mvnw.cmd` instead of `./mvnw`. JUnit 5 is a test dependency.
-GitHub Actions is configured to run `clean verify` on Temurin 25 for pushes to `main`
-and pull requests targeting `main`.
-
-## Java formatting
-
-Java sources and tests use Google Java Format with the `GOOGLE` style (2-space block
-indentation), enforced by the pinned Spotless Maven plugin. Formatting is checked during
-Maven's `validate` phase, so the main build command and CI fail on formatting violations.
-The check does not modify files.
-
-Run from the repository root:
+Run the executable usage example on its own:
 
 ```bash
-./mvnw --batch-mode spotless:apply  # Format Java sources and tests
-./mvnw --batch-mode spotless:check  # Check formatting without changing files
+./mvnw --batch-mode -Dtest=UsageExampleTest test
 ```
 
-## Usage example
+The example is a JUnit test: a successful run reports a passing test rather than
+printing a greeting. On Windows, use `mvnw.cmd` instead of `./mvnw`.
 
-This fragment uses the classes declared in the complete executable
+## Usage
+
+The following fragment uses the public types declared in
 [`UsageExampleTest`](src/test/java/dev/bartmilo/minispringcore/UsageExampleTest.java).
-The container is `dev.bartmilo.minispringcore.MiniContext`. The test includes all imports and
-class declarations, verifies the greeting below, and demonstrates dependency sharing and refresh.
+That file contains the complete imports, constructors, and assertions.
 
 ```java
 MiniContext context = new MiniContext();
@@ -66,83 +57,102 @@ GreetingService service = context.getBean(GreetingService.class);
 System.out.println(service.greet()); // Hello, Java!
 ```
 
-Constructor injection works even though the service is registered before its dependency.
-Run the example with the optional command shown above.
+`GreetingService` receives a `MessageRepository` through its public constructor.
+The container resolves that interface to `InMemoryMessageRepository` and injects
+the cached instance. The service can be registered before its dependency: all
+required bindings must exist when resolution begins, but registration order does
+not matter.
+
+The entry point is `dev.bartmilo.minispringcore.MiniContext`; the constructor
+annotation is `dev.bartmilo.minispringcore.annotations.Autowired`.
 
 ## Container contract
 
-Registration is explicit. `register(Concrete.class)` binds a class to itself;
-`register(Interface.class, Implementation.class)` binds an exact type to a compatible concrete
-implementation. The generic signature checks compatibility at compile time, and runtime
-validation remains in place. Registering an implementation alone does not register its
-interfaces. Register all needed types before requesting beans; their registration order
-does not matter.
+| Operation | Behavior |
+| --- | --- |
+| `register(Concrete.class)` | Registers a concrete class under its own type, without creating it. |
+| `register(Type.class, Implementation.class)` | Binds an exact type to a compatible concrete implementation. |
+| `getBean(Type.class)` | Resolves dependencies recursively and caches the successfully created instance. |
+| `refresh()` | Requests every registered type, creating only instances missing from the cache. |
+
+Bindings are exact: registering an implementation does not automatically register
+its interfaces. Duplicate registrations are rejected, even for the same
+implementation, without replacing the existing definition or instance.
 
 Only public constructors participate in selection:
 
-1. Exactly one constructor annotated with
-   `dev.bartmilo.minispringcore.annotations.Autowired` is selected, even if other constructors
-   are longer or tied.
-2. Multiple public `@Autowired` constructors cause `BeanCreationException`.
-3. Without `@Autowired`, the unique public constructor with the most parameters is selected.
-4. A tie between the longest constructors causes `BeanCreationException` suggesting `@Autowired`.
-5. No public constructor causes `BeanCreationException`.
+1. A single `@Autowired` constructor takes precedence.
+2. Multiple public `@Autowired` constructors are rejected.
+3. Without the annotation, the unique constructor with the most parameters wins.
+4. A tie or the absence of a public constructor causes a creation error.
 
-The selected constructor's parameter types are resolved recursively. A missing dependency
-never causes fallback to a shorter constructor.
+A missing dependency does not trigger fallback to a shorter constructor.
 
-`getBean(type)` creates a bean lazily and reuses its instance on later calls. `refresh()`
-eagerly requests every registered type. It does not rebuild existing instances, and repeated
-calls reuse the cache. Initialization order is unspecified. If initialization fails, previously
-successful beans, including dependencies created before a constructor failed, can remain cached.
-There is no transactional rollback.
+**Singleton scope is one instance per registration key within a context.** Two
+keys bound to the same implementation receive separate instances. Different
+contexts also have separate caches.
 
-Singleton scope means **one instance per registration key within a context**. Two different
-registered types pointing to the same implementation receive separate instances. Separate
-contexts also have separate instances. The bean class does not need to implement the Singleton
-pattern; there is no alias or cross-key sharing mechanism.
+`refresh()` reuses existing instances and has no defined initialization order
+beyond dependency requirements. Initialization is not transactional: if creation
+fails, successfully created dependencies and other beans can remain cached.
+Failed beans are not cached, and creation markers are cleared so retrieval can
+be retried after correcting a missing registration.
 
-## Errors
+### Errors
 
-- `BeanRegistrationException`: incompatible binding, interface/abstract implementation, or
-  duplicate registration, including repetition of the same implementation. Rejection leaves
-  the previous definition and cached instance intact.
-- `NoSuchBeanDefinitionException`: an exact requested type or constructor dependency is missing.
-- `BeanCreationException`: ambiguous/missing public constructor, reflection failure, or a
-  constructor that throws. The original constructor throwable is preserved as the cause.
-- `CircularDependencyException`: an active registration key is requested again during creation,
-  including self-dependency and cycles through interface bindings.
-- `NullPointerException`: null arguments to registration/retrieval, or a null registry supplied
-  to `BeanFactory`.
+| Exception | Cause |
+| --- | --- |
+| `BeanRegistrationException` | Duplicate or incompatible binding, or an interface/abstract implementation. |
+| `NoSuchBeanDefinitionException` | Missing registration for the requested type or a constructor dependency. |
+| `BeanCreationException` | Constructor selection or invocation failure; an original constructor throwable is preserved as the cause. |
+| `CircularDependencyException` | A registration key is encountered again on the active creation path. |
+| `NullPointerException` | Null registration/retrieval arguments or a null registry passed to `BeanFactory`. |
 
-Failed beans are not cached, and active creation markers are removed in `finally`. Retrieval
-can be retried, for example after registering a previously missing dependency. The registry's
-public definitions view is read-only.
+## Architecture
 
-## Architecture and tests
+| Component | Responsibility |
+| --- | --- |
+| [`MiniContext`](src/main/java/dev/bartmilo/minispringcore/MiniContext.java) | Public facade for registration, retrieval, and eager initialization. |
+| [`BeanDefinitionRegistry`](src/main/java/dev/bartmilo/minispringcore/BeanDefinitionRegistry.java) | Validates bindings and exposes a read-only definitions view. |
+| [`BeanFactory`](src/main/java/dev/bartmilo/minispringcore/BeanFactory.java) | Selects constructors, resolves dependencies, detects cycles, and caches instances. |
 
-- `MiniContext` exposes registration, retrieval, and eager initialization.
-- `BeanDefinitionRegistry` validates and stores type-to-implementation definitions.
-- `BeanFactory` selects constructors, recursively resolves parameters, invokes constructors,
-  detects cycles, and caches successful instances by registration key.
+Resolution follows a small sequence: check the registration and cache → select a
+constructor → resolve its parameters → instantiate → cache. Dependencies follow
+the same sequence recursively.
 
-Flow: register definitions → request a type → reuse cache or select a constructor → resolve
-its dependencies → construct → cache. See [design notes](docs/design.md) for reading order,
-tradeoffs, failure cleanup, and design questions.
+See [design notes](docs/design.md) for the reading order, ownership of cycle
+markers, failure cleanup, and design questions.
 
-JUnit tests cover valid and invalid registrations, duplicates and nulls, all constructor
-selection rules, missing dependencies without fallback, dependency chains and sharing,
-context/key isolation, lazy/eager creation, repeated refresh, registration order, partial
-initialization failure, cycles, constructor causes, retry cleanup, and the complete example.
-Tests use small real classes and observable constructor counters, without mocking or assumptions
-about `HashMap` iteration order. Surefire reports are generated under `target/surefire-reports`.
+## Tests and code quality
 
-## Limitations
+JUnit tests cover registration validation, constructor selection, dependency
+chains and sharing, context/key isolation, lazy/eager creation, partial failures,
+constructor causes, retries, and cycles through both classes and interfaces.
+The usage example is part of the test suite. Tests use real fixture classes and
+observable behavior rather than mocking the container.
 
-The container is not thread-safe and does not provide component scanning, field/setter injection,
-qualifiers, additional scopes, lifecycle callbacks, AOP/proxies, or XML/YAML configuration.
-It is not fully compatible with Spring and is intended for studying a small constructor
-injection container.
+```bash
+./mvnw --batch-mode test
+./mvnw --batch-mode spotless:check
+```
+
+Spotless enforces Google Java Format with 2-space block indentation during Maven's
+`validate` phase. To apply formatting locally:
+
+```bash
+./mvnw --batch-mode spotless:apply
+```
+
+GitHub Actions runs `./mvnw --batch-mode clean verify` on Temurin 25 for pushes to
+`main` and pull requests targeting `main`. Test reports are written to
+`target/surefire-reports`.
+
+## Scope and limitations
+
+This is an educational library with a deliberately small API. It is not thread-safe
+and does not provide component scanning, field/setter injection, qualifiers,
+additional scopes, lifecycle callbacks, AOP/proxies, or external configuration.
+Its behavior is documented here; it does not aim for full Spring compatibility.
 
 ## License
 

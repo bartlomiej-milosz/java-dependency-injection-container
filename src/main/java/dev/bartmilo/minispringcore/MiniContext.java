@@ -23,7 +23,7 @@ public class MiniContext {
 
   /**
    * Creates all registered beans that are not already cached. Previously successful creations
-   * remain cached if initialization fails; registration order is unspecified.
+   * remain cached if initialization fails; initialization order is unspecified.
    */
   public void refresh() {
     // Loop through registered types and force creation
