@@ -46,7 +46,7 @@ public class BeanFactory {
   }
 
   private Object createBean(Class<?> clazz) {
-    Constructor<?> constructor = getConstructorWithTheMostParameters(clazz);
+    Constructor<?> constructor = selectConstructor(clazz);
     Object[] args = resolveDependencies(constructor);
     try {
       return constructor.newInstance(args);
@@ -65,11 +65,10 @@ public class BeanFactory {
     return args;
   }
 
-  private Constructor<?> getConstructorWithTheMostParameters(Class<?> clazz) {
+  private Constructor<?> selectConstructor(Class<?> clazz) {
     Constructor<?> autowiredConstructor = null;
-    Constructor<?> greediestConstructor = null;
-
-    for (Constructor<?> c : clazz.getConstructors()) {
+    Constructor<?>[] constructors = clazz.getConstructors();
+    for (Constructor<?> c : constructors) {
       if (c.isAnnotationPresent(Autowired.class)) {
         if (autowiredConstructor != null) {
           throw new BeanCreationException(
@@ -77,16 +76,28 @@ public class BeanFactory {
         }
         autowiredConstructor = c;
       }
-      if (greediestConstructor == null
-          || c.getParameterCount() > greediestConstructor.getParameterCount()) {
-        greediestConstructor = c;
-      }
     }
     if (autowiredConstructor != null) {
       return autowiredConstructor;
     }
+    Constructor<?> greediestConstructor = null;
+    boolean ambiguous = false;
+    for (Constructor<?> c : constructors) {
+      if (greediestConstructor == null
+          || c.getParameterCount() > greediestConstructor.getParameterCount()) {
+        greediestConstructor = c;
+        ambiguous = false;
+      } else if (c.getParameterCount() == greediestConstructor.getParameterCount()) {
+        ambiguous = true;
+      }
+    }
     if (greediestConstructor == null) {
       throw new BeanCreationException("No public constructor found for " + clazz.getName());
+    }
+    if (ambiguous) {
+      throw new BeanCreationException(
+          "Ambiguous public constructors with " + greediestConstructor.getParameterCount()
+              + " parameters in " + clazz.getName() + "; annotate one with @Autowired");
     }
     return greediestConstructor;
   }
