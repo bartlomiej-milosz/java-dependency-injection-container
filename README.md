@@ -1,8 +1,8 @@
 # Java Dependency Injection Container
 
-A small dependency injection container built in plain Java, inspired by Spring's
-constructor injection model. It resolves explicitly registered dependencies through
-reflection and caches one instance per registered type within a context.
+An educational dependency injection library built in plain Java, inspired by
+Spring's constructor injection model. It resolves explicitly registered dependencies
+through reflection and caches one instance per registered type within a context.
 
 The project focuses on Java Core: generics, reflection, annotations, recursive
 dependency resolution, and exception handling. It has **no runtime dependencies**.
