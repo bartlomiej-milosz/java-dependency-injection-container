@@ -45,7 +45,7 @@ printing a greeting. On Windows, use `mvnw.cmd` instead of `./mvnw`.
 ## Usage
 
 The following fragment uses the public types declared in
-[`UsageExampleTest`](src/test/java/dev/bartmilo/minispringcore/UsageExampleTest.java).
+[`UsageExampleTest`](src/test/java/dev/bartmilo/dicontainer/UsageExampleTest.java).
 That file contains the complete imports, constructors, and assertions.
 
 ```java
@@ -63,8 +63,8 @@ the cached instance. The service can be registered before its dependency: all
 required bindings must exist when resolution begins, but registration order does
 not matter.
 
-The entry point is `dev.bartmilo.minispringcore.MiniContext`; the constructor
-annotation is `dev.bartmilo.minispringcore.annotations.Autowired`.
+The entry point is `dev.bartmilo.dicontainer.MiniContext`; the constructor
+annotation is `dev.bartmilo.dicontainer.annotations.Autowired`.
 
 ## Container contract
 
@@ -112,9 +112,9 @@ be retried after correcting a missing registration.
 
 | Component | Responsibility |
 | --- | --- |
-| [`MiniContext`](src/main/java/dev/bartmilo/minispringcore/MiniContext.java) | Public facade for registration, retrieval, and eager initialization. |
-| [`BeanDefinitionRegistry`](src/main/java/dev/bartmilo/minispringcore/BeanDefinitionRegistry.java) | Validates bindings and exposes a read-only definitions view. |
-| [`BeanFactory`](src/main/java/dev/bartmilo/minispringcore/BeanFactory.java) | Selects constructors, resolves dependencies, detects cycles, and caches instances. |
+| [`MiniContext`](src/main/java/dev/bartmilo/dicontainer/MiniContext.java) | Public facade for registration, retrieval, and eager initialization. |
+| [`BeanDefinitionRegistry`](src/main/java/dev/bartmilo/dicontainer/BeanDefinitionRegistry.java) | Validates bindings and exposes a read-only definitions view. |
+| [`BeanFactory`](src/main/java/dev/bartmilo/dicontainer/BeanFactory.java) | Selects constructors, resolves dependencies, detects cycles, and caches instances. |
 
 Resolution follows a small sequence: check the registration and cache → select a
 constructor → resolve its parameters → instantiate → cache. Dependencies follow

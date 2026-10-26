@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore.annotations;
+package dev.bartmilo.dicontainer.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

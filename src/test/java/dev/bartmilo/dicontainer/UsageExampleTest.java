@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;

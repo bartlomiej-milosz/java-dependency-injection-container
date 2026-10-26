@@ -1,13 +1,13 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import dev.bartmilo.minispringcore.resources.TestDatabase;
-import dev.bartmilo.minispringcore.resources.TestDeepRepository;
-import dev.bartmilo.minispringcore.resources.TestDeepService;
-import dev.bartmilo.minispringcore.resources.TestRepository;
+import dev.bartmilo.dicontainer.exceptions.BeanRegistrationException;
+import dev.bartmilo.dicontainer.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.dicontainer.resources.TestDatabase;
+import dev.bartmilo.dicontainer.resources.TestDeepRepository;
+import dev.bartmilo.dicontainer.resources.TestDeepService;
+import dev.bartmilo.dicontainer.resources.TestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

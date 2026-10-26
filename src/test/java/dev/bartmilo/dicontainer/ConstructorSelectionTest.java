@@ -1,11 +1,11 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.bartmilo.minispringcore.annotations.Autowired;
-import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import dev.bartmilo.minispringcore.resources.TestPrivateConstructorBean;
+import dev.bartmilo.dicontainer.annotations.Autowired;
+import dev.bartmilo.dicontainer.exceptions.BeanCreationException;
+import dev.bartmilo.dicontainer.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.dicontainer.resources.TestPrivateConstructorBean;
 import org.junit.jupiter.api.Test;
 
 class ConstructorSelectionTest {

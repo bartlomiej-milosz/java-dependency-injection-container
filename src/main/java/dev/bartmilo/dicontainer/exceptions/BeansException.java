@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore.exceptions;
+package dev.bartmilo.dicontainer.exceptions;
 
 public class BeansException extends RuntimeException {
   public BeansException(String message) {

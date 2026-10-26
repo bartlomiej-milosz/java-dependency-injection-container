@@ -1,9 +1,9 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
-import dev.bartmilo.minispringcore.annotations.Autowired;
-import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
-import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.dicontainer.annotations.Autowired;
+import dev.bartmilo.dicontainer.exceptions.BeanCreationException;
+import dev.bartmilo.dicontainer.exceptions.CircularDependencyException;
+import dev.bartmilo.dicontainer.exceptions.NoSuchBeanDefinitionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;

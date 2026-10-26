@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore.resources;
+package dev.bartmilo.dicontainer.resources;
 
 public class TestDeepService {
   private final TestDeepRepository repository;

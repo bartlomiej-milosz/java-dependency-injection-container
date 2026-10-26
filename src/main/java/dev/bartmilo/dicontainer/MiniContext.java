@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 /** An educational, explicitly configured constructor injection container. Not thread-safe. */
 public class MiniContext {
@@ -14,8 +14,8 @@ public class MiniContext {
    * Registers a compatible concrete implementation under a type.
    *
    * @throws NullPointerException if either argument is null
-   * @throws dev.bartmilo.minispringcore.exceptions.BeanRegistrationException if the binding is
-   *     invalid or the type is already registered
+   * @throws dev.bartmilo.dicontainer.exceptions.BeanRegistrationException if the binding is invalid
+   *     or the type is already registered
    */
   public <T> void register(Class<T> type, Class<? extends T> implementation) {
     this.registry.register(type, implementation);

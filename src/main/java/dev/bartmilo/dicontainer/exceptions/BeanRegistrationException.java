@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore.exceptions;
+package dev.bartmilo.dicontainer.exceptions;
 
 public class BeanRegistrationException extends BeansException {
   public BeanRegistrationException(String message) {

@@ -1,12 +1,12 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.bartmilo.minispringcore.exceptions.BeanCreationException;
-import dev.bartmilo.minispringcore.exceptions.CircularDependencyException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
-import dev.bartmilo.minispringcore.resources.TestCircularA;
-import dev.bartmilo.minispringcore.resources.TestCircularB;
+import dev.bartmilo.dicontainer.exceptions.BeanCreationException;
+import dev.bartmilo.dicontainer.exceptions.CircularDependencyException;
+import dev.bartmilo.dicontainer.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.dicontainer.resources.TestCircularA;
+import dev.bartmilo.dicontainer.resources.TestCircularB;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

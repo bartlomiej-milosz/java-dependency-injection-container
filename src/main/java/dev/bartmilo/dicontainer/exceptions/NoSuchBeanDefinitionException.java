@@ -1,4 +1,4 @@
-package dev.bartmilo.minispringcore.exceptions;
+package dev.bartmilo.dicontainer.exceptions;
 
 public class NoSuchBeanDefinitionException extends BeansException {
   public NoSuchBeanDefinitionException(String message) {

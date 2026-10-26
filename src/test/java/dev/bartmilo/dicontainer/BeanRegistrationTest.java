@@ -1,9 +1,9 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
-import dev.bartmilo.minispringcore.exceptions.NoSuchBeanDefinitionException;
+import dev.bartmilo.dicontainer.exceptions.BeanRegistrationException;
+import dev.bartmilo.dicontainer.exceptions.NoSuchBeanDefinitionException;
 import org.junit.jupiter.api.Test;
 
 class BeanRegistrationTest {

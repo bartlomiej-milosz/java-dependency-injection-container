@@ -1,6 +1,6 @@
-package dev.bartmilo.minispringcore;
+package dev.bartmilo.dicontainer;
 
-import dev.bartmilo.minispringcore.exceptions.BeanRegistrationException;
+import dev.bartmilo.dicontainer.exceptions.BeanRegistrationException;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
